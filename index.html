@@ -2,79 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Professional WebGIS - Client Spatial Dashboard</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-control-geocoder/2.4.0/Control.Geocoder.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    
     <style>
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #map { height: 100vh; width: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
         
-        /* Advanced Professional Control Panel */
         .custom-gis-control {
             background: rgba(255, 255, 255, 0.95);
-            padding: 14px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 240px;
-            max-height: 85vh;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            width: 260px; border: 1px solid #e0e0e0;
+            display: flex; flex-direction: column; transition: all 0.3s ease;
         }
+
+        .gis-panel-header {
+            padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; background: #F8FAFC; border-radius: 8px 8px 0 0; border-bottom: 1px solid #E2E8F0;
+        }
+
+        .gis-panel-title { font-weight: bold; font-size: 13px; color: #1E293B; }
+        .gis-panel-content { padding: 14px; max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+
         .gis-section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: #4A5568;
-            margin-top: 6px;
-            padding-bottom: 4px;
-            border-bottom: 2px solid #E2E8F0;
-            letter-spacing: 0.5px;
+            font-size: 11px; text-transform: uppercase; font-weight: 700; color: #4A5568;
+            margin-top: 6px; padding-bottom: 4px; border-bottom: 2px solid #E2E8F0; letter-spacing: 0.5px;
         }
+
         .gis-info-box {
-            font-size: 11px;
-            color: #047857;
-            background: #D1FAE5;
-            padding: 8px;
-            border-radius: 4px;
-            line-height: 1.4;
-            border: 1px solid #10B981;
+            font-size: 11px; color: #047857; background: #D1FAE5;
+            padding: 8px; border-radius: 4px; line-height: 1.4; border: 1px solid #10B981;
         }
+
         .gis-btn {
-            background: #ffffff;
-            border: 1px solid #CBD5E1;
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #334155;
-            cursor: pointer;
-            border-radius: 6px;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
+            background: #ffffff; border: 1px solid #CBD5E1; padding: 10px 12px;
+            font-size: 12px; font-weight: 600; color: #334155;
+            cursor: pointer; border-radius: 6px; text-align: left;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease;
         }
+        
         .gis-btn:hover { background: #F8FAFC; border-color: #94A3B8; }
-        .btn-import { color: #2563EB; background: #EFF6FF; border-color: #BFDBFE; }
-        .btn-import:hover { background: #DBEAFE; }
-        .btn-export { color: #16A34A; background: #F0FDF4; border-color: #BBF7D0; }
-        .btn-export:hover { background: #DCFCE7; }
+        .btn-import { color: #2563EB; background: #EFF6FF; border-color: #BFDBFE; justify-content: flex-start; }
+        .btn-export { color: #16A34A; background: #F0FDF4; border-color: #BBF7D0; justify-content: flex-start; }
         .btn-delete { color: #DC2626; background: #FEF2F2; border-color: #FEE2E2; margin-top: 4px; }
-        .btn-delete:hover { background: #FEE2E2; }
         .hidden-input { display: none; }
         
-        /* Popup Styling */
         .gis-popup-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
         .gis-popup-table td { padding: 4px; border-bottom: 1px solid #E2E8F0; }
         .gis-popup-table tr:nth-child(even) { background: #F8FAFC; }
-        .popup-input {
-            width: 100%; box-sizing: border-box; padding: 4px;
-            border: 1px solid #CBD5E1; border-radius: 4px; margin-top: 4px; font-size: 11px;
+        .popup-input { width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #CBD5E1; border-radius: 4px; margin-top: 4px; font-size: 11px; }
+
+        @media (max-width: 768px) {
+            .custom-gis-control { width: calc(100vw - 30px); margin-left: 5px; }
+            .gis-panel-content { max-height: 45vh; }
+            .leaflet-popup-content { max-width: 220px !important; }
         }
     </style>
 </head>
@@ -83,220 +68,193 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-control-geocoder/2.4.0/Control.Geocoder.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-omnivore/v0.3.1/leaflet-omnivore.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.10.3/leaflet.geometryutil.min.js"></script>
 
     <script>
+        window.toggleGISPanel = function() {
+            const content = document.getElementById('gis-panel-content');
+            const icon = document.getElementById('gis-panel-icon');
+            if (content.style.display === 'none') {
+                content.style.display = 'flex'; icon.innerHTML = '▼';
+            } else {
+                content.style.display = 'none'; icon.innerHTML = '▲';
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             
-            // ==========================================
-            // 1. AUTO-ZOOM & CONFIG LAYER ORTOMOSAIC
-            // ==========================================
-            const droneBounds = [
-                [-6.1634212, 106.9213299],
-                [-6.1605162, 106.9245569]
-            ];
-
-            const map = L.map('map', { minZoom: 2, maxZoom: 24 }).fitBounds(droneBounds);
+            const droneBounds = [[-6.1634212, 106.9213299], [-6.1605162, 106.9245569]];
+            const map = L.map('map', { minZoom: 2, maxZoom: 24, tap: false }).fitBounds(droneBounds);
 
             const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' });
             const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' });
-            
-            // PERUBAHAN CLOUD: Menggunakan relative path './COG/...' agar GitHub/AWS S3 bisa merender dinamis
-            const realDroneOrthomosaic = L.tileLayer('./COG/{z}/{x}/{y}.png', {
-                attribution: '📷 High-Res Drone Orthomosaic',
-                maxNativeZoom: 20,
-                maxZoom: 24,
-                tms: false,
-                errorTileUrl: '' 
-            });
+            const realDroneOrthomosaic = L.tileLayer('./COG/{z}/{x}/{y}.png', { attribution: '📷 High-Res Drone Orthomosaic', maxNativeZoom: 20, maxZoom: 24, tms: false, errorTileUrl: '' });
 
-            osmLayer.addTo(map);
-            realDroneOrthomosaic.addTo(map);
+            osmLayer.addTo(map); realDroneOrthomosaic.addTo(map);
 
-            const baseMaps = {
-                "OpenStreetMap Standard": osmLayer,
-                "Esri Satellite Imagery": satelliteLayer
-            };
+            const baseMaps = { "OpenStreetMap Standard": osmLayer, "Esri Satellite Imagery": satelliteLayer };
+            const overlayMaps = { "📷 Drone Orthomosaic": realDroneOrthomosaic };
 
-            const overlayMaps = {
-                "📷 Drone Orthomosaic": realDroneOrthomosaic
-            };
+            L.control.layers(baseMaps, overlayMaps, { collapsed: true }).addTo(map);
 
-            L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+            const drawnItems = new L.FeatureGroup(); map.addLayer(drawnItems);
+            const importedItems = new L.FeatureGroup(); map.addLayer(importedItems);
 
-            // ==========================================
-            // 2. VECTOR LAYER MANAGEMENT & CLOUD AUTO-SAVE
-            // ==========================================
-            const drawnItems = new L.FeatureGroup();
-            map.addLayer(drawnItems);
-            
-            const importedItems = new L.FeatureGroup();
-            map.addLayer(importedItems);
-
-            // Menyimpan di browser cache client, sangat stabil di environment cloud (HTTPS)
             function saveWorkspace() {
-                if (drawnItems.getLayers().length > 0) {
-                    localStorage.setItem('cloud_webgis_autosave', JSON.stringify(drawnItems.toGeoJSON()));
-                } else {
-                    localStorage.removeItem('cloud_webgis_autosave');
-                }
+                if (drawnItems.getLayers().length > 0) localStorage.setItem('cloud_webgis_autosave', JSON.stringify(drawnItems.toGeoJSON()));
+                else localStorage.removeItem('cloud_webgis_autosave');
             }
 
             const savedData = localStorage.getItem('cloud_webgis_autosave');
             if (savedData) {
                 try {
-                    L.geoJSON(JSON.parse(savedData), {
-                        onEachFeature: function(feature, layer) {
-                            bindDynamicPopup(layer, feature.properties.Type || feature.geometry.type, feature.properties);
-                            drawnItems.addLayer(layer);
-                        }
-                    });
-                } catch (e) {
-                    console.error("Gagal memuat auto-save data.");
-                }
+                    L.geoJSON(JSON.parse(savedData), { onEachFeature: function(feature, layer) {
+                        bindDynamicPopup(layer, feature.properties.Type || feature.geometry.type, feature.properties); drawnItems.addLayer(layer);
+                    }});
+                } catch (e) { console.error("Gagal memuat auto-save data."); }
             }
 
-            // ==========================================
-            // 3. CONTROL PANEL UI
-            // ==========================================
             const GISControlPanel = L.Control.extend({
                 options: { position: 'topleft' },
                 onAdd: function () {
                     const container = L.DomUtil.create('div', 'custom-gis-control');
-                    container.innerHTML = `
-                        <div style="font-weight: bold; font-size: 13px; color: #1E293B; text-align:center;">Client Spatial Dashboard</div>
-                        
-                        <div class="gis-section-title">System Status</div>
-                        <div class="gis-info-box">
-                            🌐 <b>Cloud Hosted Active</b><br>
-                            💾 <b>Auto-Save:</b> Enabled
-                        </div>
-
-                        <div class="gis-section-title">Data Ingestion</div>
-                        <input type="file" id="fileInput" class="hidden-input" accept=".kml,.geojson" />
-                        <button class="gis-btn btn-import" onclick="document.getElementById('fileInput').click()">📂 Import KML / GeoJSON</button>
-                        
-                        <input type="file" id="csvTxtInput" class="hidden-input" accept=".csv,.txt" />
-                        <button class="gis-btn btn-import" onclick="document.getElementById('csvTxtInput').click()">📍 Import CSV / TXT (Points)</button>
-
-                        <div class="gis-section-title">Data Serialization</div>
-                        <button class="gis-btn btn-export" onclick="window.exportToKML()">💾 Export to KML</button>
-                        <button class="gis-btn btn-export" onclick="window.exportToGeoJSON()">💾 Export to GeoJSON</button>
-                        <button class="gis-btn btn-export" onclick="window.exportToCSV()">💾 Export Points to CSV</button>
-
-                        <div class="gis-section-title">Layers Reset</div>
-                        <button class="gis-btn btn-delete" id="btnClear">🗑️ Clear Workspace</button>
-                    `;
                     L.DomEvent.disableClickPropagation(container);
+                    L.DomEvent.disableScrollPropagation(container);
+
+                    container.innerHTML = `
+                        <div class="gis-panel-header" onclick="window.toggleGISPanel()">
+                            <div class="gis-panel-title">Client Spatial Dashboard</div>
+                            <div id="gis-panel-icon" style="font-size:10px; color:#64748B;">▼</div>
+                        </div>
+                        <div id="gis-panel-content" class="gis-panel-content">
+                            
+                            <div class="gis-section-title">Cari Lokasi</div>
+                            <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+                                <input type="text" id="customSearchInput" class="popup-input" style="margin-top:0;" placeholder="Nama tempat / area...">
+                                <button class="gis-btn" style="padding: 6px 12px;" onclick="window.customSearch()">🔍</button>
+                            </div>
+
+                            <div class="gis-section-title">Data Ingestion</div>
+                            <input type="file" id="fileInput" class="hidden-input" accept=".kml,.geojson" />
+                            <button class="gis-btn btn-import" onclick="document.getElementById('fileInput').click()">📂 Import KML / GeoJSON</button>
+                            <input type="file" id="csvTxtInput" class="hidden-input" accept=".csv,.txt" />
+                            <button class="gis-btn btn-import" onclick="document.getElementById('csvTxtInput').click()">📍 Import CSV / TXT</button>
+
+                            <div class="gis-section-title">Data Serialization</div>
+                            <button class="gis-btn btn-export" onclick="window.exportToKML()">💾 Export to KML</button>
+                            <button class="gis-btn btn-export" onclick="window.exportToGeoJSON()">💾 Export to GeoJSON</button>
+                            <button class="gis-btn btn-export" onclick="window.exportToCSV()">💾 Export Points CSV</button>
+
+                            <div class="gis-section-title">Layers Reset</div>
+                            <button class="gis-btn btn-delete" id="btnClear">🗑️ Clear Workspace</button>
+                        </div>
+                    `;
                     return container;
                 }
             });
             map.addControl(new GISControlPanel());
 
-            // 4. SANITIZATION HELPER
+            if(window.innerWidth <= 768) { window.toggleGISPanel(); }
+
+            // LOGIKA PENCARIAN KUSTOM (Geocoding)
+            const geocoderInstance = L.Control.Geocoder.nominatim();
+            window.customSearch = function() {
+                const query = document.getElementById('customSearchInput').value;
+                if (!query) return;
+                
+                // Ubah tombol jadi loading text sementara
+                const btn = document.querySelector('button[onclick="window.customSearch()"]');
+                const oldText = btn.innerHTML;
+                btn.innerHTML = '⏳';
+
+                geocoderInstance.geocode(query, function(results) {
+                    btn.innerHTML = oldText;
+                    if (results && results.length > 0) {
+                        const r = results[0];
+                        map.fitBounds(r.bbox);
+                        L.popup().setLatLng(r.center).setContent(`<b>Hasil:</b> ${r.name}`).openOn(map);
+                        
+                        // Tutup panel secara otomatis jika dibuka di HP agar peta terlihat jelas
+                        if(window.innerWidth <= 768) window.toggleGISPanel();
+                    } else {
+                        alert("Lokasi tidak ditemukan. Coba gunakan nama yang lebih umum.");
+                    }
+                });
+            };
+
+            // Trigger pencarian dengan tombol Enter
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && document.activeElement.id === 'customSearchInput') {
+                    window.customSearch();
+                }
+            });
+
             function escapeXml(unsafe) {
                 if (typeof unsafe !== 'string') return unsafe;
                 return unsafe.replace(/[<>&'"]/g, function (c) {
-                    switch (c) {
-                        case '<': return '&lt;'; case '>': return '&gt;';
-                        case '&': return '&amp;'; case '\'': return '&apos;'; case '"': return '&quot;';
-                    }
+                    switch (c) { case '<': return '&lt;'; case '>': return '&gt;'; case '&': return '&amp;'; case '\'': return '&apos;'; case '"': return '&quot;'; }
                 });
             }
 
-            // 5. ATTRIBUTE POPUP GENERATOR
             function bindDynamicPopup(layer, type, initialProps = {}) {
                 layer.feature = layer.feature || { type: 'Feature', properties: {} };
                 let defaultName = initialProps.name || `Feature #${layer._leaflet_id || Math.floor(Math.random()*1000)}`;
-                
-                layer.feature.properties = Object.assign({
-                    Type: type, name: defaultName, Acquisition_Date: new Date().toISOString().split('T')[0]
-                }, layer.feature.properties, initialProps);
+                layer.feature.properties = Object.assign({ Type: type, name: defaultName, Acquisition_Date: new Date().toISOString().split('T')[0] }, layer.feature.properties, initialProps);
 
                 const updateContent = () => {
-                    const props = layer.feature.properties;
-                    let tableRows = ``;
-                    for (const [key, value] of Object.entries(props)) {
-                        if (key !== 'name') tableRows += `<tr><td><b>${key}</b></td><td>${value}</td></tr>`;
-                    }
+                    const props = layer.feature.properties; let tableRows = ``;
+                    for (const [key, value] of Object.entries(props)) { if (key !== 'name') tableRows += `<tr><td><b>${key}</b></td><td>${value}</td></tr>`; }
                     const htmlContent = `
                         <div style="min-width:200px;">
                             <div style="font-weight:bold; font-size:12px; margin-bottom:5px; color:#1E293B;">Attributes Editor</div>
                             <label style="font-size:10px; color:#64748B;">Object Name:</label>
                             <input type="text" class="popup-input" value="${props.name}" onchange="window.updateLayerAttribute(${layer._leaflet_id}, 'name', this.value)"/>
-                            <table class="gis-popup-table">${tableRows}</table>
+                            <div style="max-height: 150px; overflow-y: auto;">
+                                <table class="gis-popup-table">${tableRows}</table>
+                            </div>
                         </div>
                     `;
                     layer.bindPopup(htmlContent);
                 };
-                updateContent();
-                layer.on('popupopen', updateContent);
+                updateContent(); layer.on('popupopen', updateContent);
             }
 
             window.updateLayerAttribute = function(id, key, value) {
                 let layer = drawnItems.getLayer(id) || importedItems.getLayer(id);
-                if (layer && layer.feature && layer.feature.properties) {
-                    layer.feature.properties[key] = value;
-                    saveWorkspace();
-                }
+                if (layer && layer.feature && layer.feature.properties) { layer.feature.properties[key] = value; saveWorkspace(); }
             };
 
-            // 6. GEOMETRIC CALCULATIONS
             function calculateSpatialMetrics(layer, type) {
                 let metrics = {};
                 if (type === 'polygon' || type === 'rectangle' || type === 'Polygon') {
-                    let latlngs = layer.getLatLngs();
-                    let targetLatLngs = Array.isArray(latlngs[0]) ? latlngs[0] : latlngs;
+                    let latlngs = layer.getLatLngs(); let targetLatLngs = Array.isArray(latlngs[0]) ? latlngs[0] : latlngs;
                     if (L.GeometryUtil && L.GeometryUtil.geodesicArea) {
                         const area = L.GeometryUtil.geodesicArea(targetLatLngs);
-                        metrics.Area_m2 = parseFloat(area.toFixed(2));
-                        metrics.Area_ha = parseFloat((area / 10000).toFixed(4));
+                        metrics.Area_m2 = parseFloat(area.toFixed(2)); metrics.Area_ha = parseFloat((area / 10000).toFixed(4));
                     }
                 } else if (type === 'polyline' || type === 'LineString') {
-                    const latlngs = layer.getLatLngs();
-                    let distance = 0;
-                    for (let i = 0; i < latlngs.length - 1; i++) {
-                        distance += latlngs[i].distanceTo(latlngs[i + 1]);
-                    }
-                    metrics.Distance_m = parseFloat(distance.toFixed(2));
-                    metrics.Distance_km = parseFloat((distance / 1000).toFixed(4));
+                    const latlngs = layer.getLatLngs(); let distance = 0;
+                    for (let i = 0; i < latlngs.length - 1; i++) { distance += latlngs[i].distanceTo(latlngs[i + 1]); }
+                    metrics.Distance_m = parseFloat(distance.toFixed(2)); metrics.Distance_km = parseFloat((distance / 1000).toFixed(4));
                 } else if (type === 'marker' || type === 'circlemarker' || type === 'Point') {
-                    const latlng = layer.getLatLng();
-                    metrics.Latitude = latlng.lat.toFixed(6);
-                    metrics.Longitude = latlng.lng.toFixed(6);
+                    const latlng = layer.getLatLng(); metrics.Latitude = latlng.lat.toFixed(6); metrics.Longitude = latlng.lng.toFixed(6);
                 }
                 return metrics;
             }
 
-            // 7. FILE IMPORT LOGIC
             document.getElementById('fileInput').addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const MAX_SIZE = 15 * 1024 * 1024;
-                if (file.size > MAX_SIZE) {
-                    if (!confirm(`File size is ${(file.size / (1024*1024)).toFixed(1)}MB. Loading large vector files may slow down the browser. Continue?`)) {
-                        this.value = ''; return;
-                    }
-                }
-
+                const file = e.target.files[0]; if (!file) return;
                 const reader = new FileReader();
                 if (file.name.endsWith('.geojson')) {
                     reader.onload = function (event) {
                         try {
                             const geojsonData = JSON.parse(event.target.result);
-                            const geojsonLayer = L.geoJSON(geojsonData, {
-                                onEachFeature: function (feature, layer) {
-                                    bindDynamicPopup(layer, feature.geometry.type, feature.properties);
-                                }
-                            });
-                            importedItems.addLayer(geojsonLayer);
-                            map.fitBounds(geojsonLayer.getBounds());
+                            const geojsonLayer = L.geoJSON(geojsonData, { onEachFeature: function (feature, layer) { bindDynamicPopup(layer, feature.geometry.type, feature.properties); } });
+                            importedItems.addLayer(geojsonLayer); map.fitBounds(geojsonLayer.getBounds());
                         } catch (err) { alert("Invalid GeoJSON format."); }
-                    };
-                    reader.readAsText(file);
+                    }; reader.readAsText(file);
                 } else if (file.name.endsWith('.kml')) {
                     reader.onload = function (event) {
                         try {
@@ -304,33 +262,23 @@
                             kmlLayer.eachLayer(function(layer) {
                                 let originalProps = (layer.feature && layer.feature.properties) ? layer.feature.properties : {};
                                 let geomType = layer.toGeoJSON ? layer.toGeoJSON().geometry.type : "Unknown";
-                                bindDynamicPopup(layer, geomType, originalProps);
-                                importedItems.addLayer(layer);
+                                bindDynamicPopup(layer, geomType, originalProps); importedItems.addLayer(layer);
                             });
                             if (kmlLayer.getBounds().isValid()) map.fitBounds(kmlLayer.getBounds());
                         } catch (err) { alert("Failed to parse KML."); }
-                    };
-                    reader.readAsText(file);
+                    }; reader.readAsText(file);
                 }
                 this.value = '';
             });
 
             document.getElementById('csvTxtInput').addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
+                const file = e.target.files[0]; if (!file) return;
                 const reader = new FileReader();
                 reader.onload = function (event) {
-                    const text = event.target.result;
-                    const lines = text.split(/\r?\n/);
-                    if (lines.length < 2) return alert("Invalid file format.");
-                    
-                    let delimiter = ',';
-                    if (file.name.endsWith('.txt') && text.indexOf('\t') !== -1) delimiter = '\t';
-                    
+                    const lines = event.target.result.split(/\r?\n/); if (lines.length < 2) return alert("Invalid file format.");
+                    let delimiter = (file.name.endsWith('.txt') && event.target.result.indexOf('\t') !== -1) ? '\t' : ',';
                     const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase());
-                    const latIdx = headers.findIndex(h => h.includes('lat') || h === 'y');
-                    const lngIdx = headers.findIndex(h => h.includes('lon') || h.includes('lng') || h === 'x');
+                    const latIdx = headers.findIndex(h => h.includes('lat') || h === 'y'); const lngIdx = headers.findIndex(h => h.includes('lon') || h.includes('lng') || h === 'x');
                     const nameIdx = headers.findIndex(h => h.includes('name') || h.includes('label') || h.includes('id'));
 
                     if (latIdx === -1 || lngIdx === -1) return alert("Missing 'latitude' and 'longitude' columns.");
@@ -338,44 +286,28 @@
                     let count = 0; let bounds = [];
                     for (let i = 1; i < lines.length; i++) {
                         if (!lines[i].trim()) continue;
-                        const cols = lines[i].split(delimiter);
-                        const lat = parseFloat(cols[latIdx]);
-                        const lng = parseFloat(cols[lngIdx]);
+                        const cols = lines[i].split(delimiter); const lat = parseFloat(cols[latIdx]); const lng = parseFloat(cols[lngIdx]);
                         const name = nameIdx !== -1 ? cols[nameIdx] : `Point_${i}`;
                         
                         if (!isNaN(lat) && !isNaN(lng)) {
-                            if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
-                                alert(`Row ${i + 1} rejected: Coordinates out of WGS84 bounds. Convert UTM first.`);
-                                continue;
-                            }
+                            if (Math.abs(lat) > 90 || Math.abs(lng) > 180) continue;
                             const marker = L.marker([lat, lng]);
                             bindDynamicPopup(marker, 'Point', { name: name, Latitude: lat, Longitude: lng });
-                            importedItems.addLayer(marker);
-                            bounds.push([lat, lng]);
-                            count++;
+                            importedItems.addLayer(marker); bounds.push([lat, lng]); count++;
                         }
                     }
-                    if (count > 0) {
-                        map.fitBounds(bounds); alert(`Loaded ${count} WGS84 points.`);
-                    }
-                };
-                reader.readAsText(file);
-                this.value = '';
+                    if (count > 0) { map.fitBounds(bounds); alert(`Loaded ${count} WGS84 points.`); }
+                }; reader.readAsText(file); this.value = '';
             });
 
-            // 8. DATA SERIALIZATION
             function getUnifiedFeatures() {
                 const compiledFeatures = [];
                 const extract = (layerGroup) => {
                     layerGroup.eachLayer(function(layer) {
                         if (layer.toGeoJSON) {
                             const gj = layer.toGeoJSON();
-                            if (gj.type === 'FeatureCollection') {
-                                compiledFeatures.push(...gj.features);
-                            } else {
-                                if (layer.feature && layer.feature.properties) gj.properties = layer.feature.properties;
-                                compiledFeatures.push(gj);
-                            }
+                            if (gj.type === 'FeatureCollection') { compiledFeatures.push(...gj.features); } 
+                            else { if (layer.feature && layer.feature.properties) gj.properties = layer.feature.properties; compiledFeatures.push(gj); }
                         }
                     });
                 };
@@ -383,33 +315,25 @@
             }
 
             window.exportToKML = function() {
-                const features = getUnifiedFeatures();
-                if (features.length === 0) return alert("No data available to export.");
-                
+                const features = getUnifiedFeatures(); if (features.length === 0) return alert("No data available to export.");
                 let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n  <Document>\n    <name>Exported_Data</name>\n`;
                 features.forEach((feature, index) => {
                     let name = feature.properties.name || `Object_${index + 1}`;
                     kml += `    <Placemark>\n      <name>${escapeXml(name)}</name>\n`;
                     if (feature.properties) {
                         kml += `      <ExtendedData>\n`;
-                        for (const [key, value] of Object.entries(feature.properties)) {
-                            kml += `        <Data name="${escapeXml(key)}"><value>${escapeXml(String(value))}</value></Data>\n`;
-                        }
+                        for (const [key, value] of Object.entries(feature.properties)) { kml += `        <Data name="${escapeXml(key)}"><value>${escapeXml(String(value))}</value></Data>\n`; }
                         kml += `      </ExtendedData>\n`;
                     }
-                    const geom = feature.geometry;
-                    if (!geom) return;
+                    const geom = feature.geometry; if (!geom) return;
                     if (geom.type === 'LineString') {
-                        kml += `      <LineString>\n        <coordinates>\n`;
-                        geom.coordinates.forEach(coord => { kml += `          ${coord[0]},${coord[1]},0\n`; });
+                        kml += `      <LineString>\n        <coordinates>\n`; geom.coordinates.forEach(coord => { kml += `          ${coord[0]},${coord[1]},0\n`; });
                         kml += `        </coordinates>\n      </LineString>\n`;
                     } else if (geom.type === 'Polygon') {
                         kml += `      <Polygon>\n        <outerBoundaryIs>\n          <LinearRing>\n            <coordinates>\n`;
                         geom.coordinates[0].forEach(coord => { kml += `              ${coord[0]},${coord[1]},0\n`; });
                         kml += `            </coordinates>\n          </LinearRing>\n        </outerBoundaryIs>\n      </Polygon>\n`;
-                    } else if (geom.type === 'Point') {
-                        kml += `      <Point>\n        <coordinates>${geom.coordinates[0]},${geom.coordinates[1]},0</coordinates>\n      </Point>\n`;
-                    }
+                    } else if (geom.type === 'Point') { kml += `      <Point>\n        <coordinates>${geom.coordinates[0]},${geom.coordinates[1]},0</coordinates>\n      </Point>\n`; }
                     kml += `    </Placemark>\n`;
                 });
                 kml += `  </Document>\n</kml>`;
@@ -417,70 +341,51 @@
             };
 
             window.exportToGeoJSON = function() {
-                const features = getUnifiedFeatures();
-                if (features.length === 0) return alert("No data available to export.");
+                const features = getUnifiedFeatures(); if (features.length === 0) return alert("No data available.");
                 downloadTrigger(JSON.stringify({ type: "FeatureCollection", features: features }, null, 2), 'Export.geojson', 'application/json');
             };
 
             window.exportToCSV = function() {
-                const features = getUnifiedFeatures();
-                let csvContent = "Name,Latitude,Longitude,Remarks\n";
-                let pointCount = 0;
+                const features = getUnifiedFeatures(); let csvContent = "Name,Latitude,Longitude,Remarks\n"; let pointCount = 0;
                 features.forEach((feature) => {
                     if (feature.geometry && feature.geometry.type === 'Point') {
                         const name = feature.properties.name || `Point_${pointCount + 1}`;
-                        csvContent += `"${name}",${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]},"${feature.properties.Type || "Point"}"\n`;
-                        pointCount++;
+                        csvContent += `"${name}",${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]},"${feature.properties.Type || "Point"}"\n`; pointCount++;
                     }
                 });
-                if (pointCount === 0) return alert("No point data to export.");
-                downloadTrigger(csvContent, 'Export.csv', 'text/csv;charset=utf-8;');
+                if (pointCount === 0) return alert("No point data to export."); downloadTrigger(csvContent, 'Export.csv', 'text/csv;charset=utf-8;');
             };
 
             function downloadTrigger(content, fileName, contentType) {
-                const link = document.createElement("a");
-                const file = new Blob([content], { type: contentType });
-                link.href = URL.createObjectURL(file);
-                link.download = fileName; link.click(); URL.revokeObjectURL(link.href);
+                const link = document.createElement("a"); const file = new Blob([content], { type: contentType });
+                link.href = URL.createObjectURL(file); link.download = fileName; link.click(); URL.revokeObjectURL(link.href);
             }
 
-            // 9. MAP RESET
             document.getElementById('btnClear').onclick = function () {
                 if (drawnItems.getLayers().length + importedItems.getLayers().length === 0) return;
                 if (confirm("Clear entire workspace? Auto-saved data will be deleted.")) {
-                    drawnItems.clearLayers(); importedItems.clearLayers();
-                    localStorage.removeItem('cloud_webgis_autosave');
+                    drawnItems.clearLayers(); importedItems.clearLayers(); localStorage.removeItem('cloud_webgis_autosave');
                 }
             };
 
-            // 10. EDIT LISTENERS
-            map.addControl(new L.Control.Draw({
-                position: 'topright',
-                edit: { featureGroup: drawnItems },
-                draw: { polygon: true, polyline: true, rectangle: true, circle: false, marker: true, circlemarker: false }
-            }));
+            map.addControl(new L.Control.Draw({ position: 'topright', edit: { featureGroup: drawnItems }, draw: { polygon: true, polyline: true, rectangle: true, circle: false, marker: true, circlemarker: false } }));
 
             let isDrawing = false;
             map.on(L.Draw.Event.DRAWSTART, function () { isDrawing = true; });
             
             map.on(L.Draw.Event.CREATED, function (e) {
                 const type = e.layerType === 'marker' ? 'Point' : e.layerType;
-                const layer = e.layer;
-                bindDynamicPopup(layer, type, calculateSpatialMetrics(layer, type));
-                drawnItems.addLayer(layer);
-                saveWorkspace();
-                layer.openPopup(); isDrawing = false;
+                const layer = e.layer; bindDynamicPopup(layer, type, calculateSpatialMetrics(layer, type));
+                drawnItems.addLayer(layer); saveWorkspace(); layer.openPopup(); isDrawing = false;
             });
 
             map.on(L.Draw.Event.EDITED, function (e) {
                 e.layers.eachLayer(function (layer) {
                     if (layer.feature && layer.feature.properties) {
-                        const type = layer.feature.properties.Type;
-                        Object.assign(layer.feature.properties, calculateSpatialMetrics(layer, type));
+                        const type = layer.feature.properties.Type; Object.assign(layer.feature.properties, calculateSpatialMetrics(layer, type));
                         if(layer.getPopup() && layer.isPopupOpen()) { layer.closePopup(); layer.openPopup(); }
                     }
-                });
-                saveWorkspace();
+                }); saveWorkspace();
             });
 
             map.on(L.Draw.Event.DELETED, function(e) { saveWorkspace(); });
@@ -497,15 +402,6 @@
                     </div>
                 `).openOn(map);
             });
-
-            // 11. IN-APP GEOCODER
-            L.Control.geocoder({ defaultMarkGeocode: false, placeholder: "Search locations..." })
-            .on('markgeocode', function(e) {
-                const bbox = e.geocode.bbox;
-                const poly = L.polygon([bbox.getSouthEast(), bbox.getNorthEast(), bbox.getNorthWest(), bbox.getSouthWest()]);
-                map.fitBounds(poly.getBounds());
-                L.popup().setLatLng(e.geocode.center).setContent(`<b>Located:</b> ${e.geocode.name}`).openOn(map);
-            }).addTo(map);
         });
     </script>
 </body>
